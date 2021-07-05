@@ -1,0 +1,15 @@
+r0_calculation.py
+animate.py
+gif_convert.py
+animation/
+.DS_Store
+__pycache__/
+data_processing.py
+main.py
+state_data/
+district_data/
+state_data_processed/
+district_data_processed/
+plots/
+r0_values/
+plot.py
