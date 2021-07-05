@@ -1,10 +1,5 @@
-import numpy as np
-
 """This file is where all our default parameters will be placed.
 """
-
-# Smoothing window
-SMOOTHING_WINDOW = 7
 
 # The number of days we use to calculate R_0
 R0_WINDOW = 14
