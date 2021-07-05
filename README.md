@@ -18,7 +18,7 @@ Figure 1 shows the evolution over time of R_0 vs daily cases per 100k population
 I am grateful to [Eric Cooper](https://www.stanfordesp.org/teach/teachers/escooper/bio.html) for many insightful conversations on COVID-19. I would also like to thank [Kartik Chandra](https://cs.stanford.edu/~kach/) for his help with Git. Thanks to Daniel Comber-Todd for his suggestion of using R_0 vs daily new cases per 100k population as a metric for assessing the severity of COVID-19.
 
 ## COVID-19 Data 
-The facebook page [Penang Lawan COVID-19](https://www.facebook.com/penanglawancovid19/) publishes daily reports of COVID-19 cases in Penang by district. I entered data from *loc. cit.* by hand into an excel file and used this as my dataset for Penang.
+The facebook page [Penang Lawan COVID-19](https://www.facebook.com/penanglawancovid19/) publishes daily reports of COVID-19 cases in Penang by district. I entered data from *loc. cit.* by hand into an excel file and used this as my dataset.
 
 ## Usage
 To see a list of all optional command line arguments, as well as a description of what these arguments mean, do:
@@ -36,7 +36,7 @@ python3 r0_model.py input_dir input_file output_dir output_file
 
 
 ### Parameters 
-The file ```params.py``` contains several parameters that you may modify for your own needs. If you want to use this for another state in Malaysia (e.g. Selangor), change ```REGION``` to your state and ```SUBREGIONS``` to the list of districts for that state.
+The file ```params.py``` contains several parameters that you may modify for your own needs. If you want to use this for another state in Malaysia (e.g. Selangor or Kedah), change ```REGION``` to your state and ```SUBREGIONS``` to the list of districts (or daerah in Malay) for that state. Make sure that the strings in ```SUBREGIONS``` are spelled (lower/upper case, spacing between words) correctly. In other words, they agree with what you have in the head of your ```.csv``` file. 
 
 ## How you can help
 Generally speaking, it is incredibly difficult to obtain COVID-19 data in Malaysia. The government publishes daily reports of COVID-19 statistics such as new cases, deaths and test positivity rates. However, to my knowledge there is no public repository of data stored in a systematic way in ``.xlsx`` or ``.csv`` files that are conducive to modelling. I would be more than happy if volunteers could help enter this data, in addition to other things such as daily deaths, test positivity rates, etc. If you wish to help, please email me.
