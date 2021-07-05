@@ -10,7 +10,7 @@ This is a simple program to calculate the R_0 of COVID-19 for each of the 5 dist
   <p align="center">
   The evolution of R_0 vs daily cases per 100000 people for each district (TL, BD, SPU, SPT, SPS) in Penang, Malaysia. Notice towards the end of May/early June how
   the dots shift from green to yellow/red. This coincides with the spike in COVID-19 across Malaysia during the holiday
-  season. GIF produced from R_0 values computed using [r0_model.py](https://github.com/dblim/penang-covid19/blob/main/r0_model.py).
+  season. GIF produced from R_0 values computed using <a href="https://github.com/dblim/penang-covid19/blob/main/r0_model.py">r0_model.py</a>.
   </p>
 </div>
 
