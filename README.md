@@ -15,7 +15,7 @@ This is a simple program to calculate the R_0 of COVID-19 for each of the 5 dist
 Figure 1 shows the evolution over time of R_0 vs daily cases per 100k population for each district (TL, BD, SPU, SPT, SPS) in Penang, Malaysia. Notice towards the end of May/early June how the dots shift from green to yellow/red. This coincides with the spike in COVID-19 across Malaysia during the holiday season. Figure 1 was produced from R_0 values computed using <a href="https://github.com/dblim/penang-covid19/blob/main/r0_model.py">r0_model.py</a>.
 
 ## Acknowledgements
-I am grateful to [Eric Cooper](https://www.stanfordesp.org/teach/teachers/escooper/bio.html) for many insightful conversations on COVID-19. I would also like to thank [Kartik Chandra](https://cs.stanford.edu/~kach/) for his help with Git. Thanks to Daniel Comber-Todd for his suggestion of using R_0 vs daily new cases per 100k population as a metric for assessing the severity of COVID-19.
+I am grateful to [Eric Cooper](https://www.stanfordesp.org/teach/teachers/escooper/bio.html) for many insightful conversations on COVID-19. I would also like to thank [Kartik Chandra](https://cs.stanford.edu/~kach/) for his help with Git. Thanks to [Daniel Comber-Todd](https://github.com/danielct) for his suggestion of using R_0 vs daily new cases per 100k population as a metric for assessing the severity of COVID-19.
 
 ## COVID-19 Data 
 The facebook page [Penang Lawan COVID-19](https://www.facebook.com/penanglawancovid19/) publishes daily reports of COVID-19 cases in Penang by district. I entered data from *loc. cit.* by hand into an excel file and used this as my dataset.
