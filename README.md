@@ -4,7 +4,7 @@ This is a simple program to calculate the R_0 of COVID-19 for each of the 5 dist
 
 
 <p align="center">
-  <img src="r0_vs_newcases.gif " alt="animated" width="60%">
+  <img src="penang.gif " alt="animated" width="60%">
 </p>
 <div style="margin:auto; width:80%">
   <p align="center">
