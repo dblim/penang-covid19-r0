@@ -31,7 +31,7 @@ python3 r0_model.py --h
 
 
 ```
-python3 r0_model.py input_dir input_file output_dir output_file
+python3 r0_model.py input_file output_file
 ```
 
 
