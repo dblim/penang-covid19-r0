@@ -94,6 +94,7 @@ def calculate_r0(args):
     output_file = args.output_file
     input_start = pd.to_datetime(args.start)
     input_end = pd.to_datetime(args.end)
+    diag_flag = args.diag
     if args.window:
         R0_WINDOW = args.window
     else:
@@ -137,21 +138,32 @@ def calculate_r0(args):
 
     # list to store output
     output_list = []
-
+    output_dates = []
     for t in range(n - R0_WINDOW + 1):
         day = df['date'].iloc[t + R0_WINDOW-1]
-        new_row = [day]
+        output_dates.append(day)
+        new_row = []
 
         for s in subregions:
-            r_0 = fit_r0(df, s, t, R0_WINDOW, SERIAL_INT)[0]
-            new_row.append(r_0)
+            r_0, b, ln_a = fit_r0(df, s, t, R0_WINDOW, SERIAL_INT)
+            a = np.exp(ln_a)
+            if diag_flag:
+                new_row.append(r_0)
+                new_row.append(a)
+                new_row.append(b)
+            else:
+                new_row.append(r_0)
         output_list.append(new_row)
     #create output DF and make the date column the index
-    output = pd.DataFrame(output_list, columns=['date'] + subregions)
-    output.set_index('date')
+    #output = pd.DataFrame(output_list, columns=['date'] + subregions)
+    #output.set_index('date')
+    if diag_flag:
+        new_cols = pd.MultiIndex.from_product([subregions, ["r0", "a", "b"]])
+        output = pd.DataFrame(output_list, index=output_dates, columns=new_cols).round(3)
+    else:
+        output = pd.DataFrame(output_list, index=output_dates, columns=subregions).round(3)
 
     # Save output of r0_values to csv file
-    output = output.round(3)
     output.to_csv(output_file)
 
     return output
