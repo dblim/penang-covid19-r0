@@ -50,10 +50,6 @@ def check_dates(start, data_start, input_start, end, data_end, input_end,
         raise ValueError(err_msg % err_data)
 
 
-
-        raise ValueError("dksdf")
-
-
 # This check is not needed - we just need enough data before the user's start
 # date -- Daniel 13.07
 #    # Length of calculation period
