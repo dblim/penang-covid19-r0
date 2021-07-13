@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 import sys
 import params
+import itertools
 
 DATE_FMT = '%d-%m-%Y'
 
@@ -141,8 +142,7 @@ def calculate_r0(args):
     output_dates = []
     for t in range(n - R0_WINDOW + 1):
         day = df['date'].iloc[t + R0_WINDOW-1]
-        output_dates.append(day)
-        new_row = []
+        new_row = [day]
 
         for s in subregions:
             r_0, b, ln_a = fit_r0(df, s, t, R0_WINDOW, SERIAL_INT)
@@ -158,10 +158,14 @@ def calculate_r0(args):
     #output = pd.DataFrame(output_list, columns=['date'] + subregions)
     #output.set_index('date')
     if diag_flag:
-        new_cols = pd.MultiIndex.from_product([subregions, ["r0", "a", "b"]])
-        output = pd.DataFrame(output_list, index=output_dates, columns=new_cols).round(3)
+        subs_r0 = map(lambda x: x +'_r0', subregions)
+        subs_a= map(lambda x: x + '_a', subregions)
+        subs_b= map(lambda x: x + '_b', subregions)
+        new_cols = list(itertools.chain(*zip(subs_r0, subs_a, subs_b)))
+        #new_cols = pd.MultiIndex.from_product([subregions, ["r0", "a", "b"]])
+        output = pd.DataFrame(output_list, columns=['date'] + new_cols).round(3)
     else:
-        output = pd.DataFrame(output_list, index=output_dates, columns=subregions).round(3)
+        output = pd.DataFrame(output_list, columns=['date'] + subregions).round(3)
 
     # Save output of r0_values to csv file
     output.to_csv(output_file)
