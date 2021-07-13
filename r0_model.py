@@ -13,30 +13,45 @@ import params
 DATE_FMT = '%d-%m-%Y'
 
 def check_dates(start, data_start, input_start, end, data_end, input_end,
-                window_length):
+                R0_WINDOW):
     """Checks if user start and end dates (for R0 calculation) are valid given
     the data start and end dates and R0_WINDOW value"""
 
     # note that start is <= input_start
-    if input_start > data_end:
-        err_mesg = ("\nSelected dates are not covered by data.\nYour start "
+    if input_start and (input_start > data_end):
+        err_msg = ("\nSelected dates are not covered by data.\nYour start "
                     "date is %s, End date of data is %s.")
         err_data = tuple(map(lambda x: x.strftime(DATE_FMT) if x else None,\
                                            (input_start, data_end)))
-        raise ValueError(err_mesg % err_data)
+        raise ValueError(err_msg % err_data)
 
     if (start < data_start)  or\
             (end < data_start or end > data_end):
-        err_mesg = ("\nSelected dates are not covered by data.\n Your start "
+        err_msg = ("\nSelected dates are not covered by data.\n Your start "
             "and end dates are     %s to %s, \n which requires data running "
             "from %s to %s. \n Start and end dates of data are "
             " %s to %s. \n Selected R0_WINDOW is %d days.")
         err_data = list(map(lambda x: x.strftime(DATE_FMT) if x else None,\
                                    (input_start, input_end, start, end,\
                                     data_start, data_end)))
-        err_data.append(window_length)
+        err_data.append(R0_WINDOW)
         err_data = tuple(err_data)
-        raise ValueError(err_mesg % err_data)
+        raise ValueError(err_msg % err_data)
+    if (end - data_start).days < R0_WINDOW -1:
+        err_msg = ("\nEnd date must be at least R0_WINDOW-1 days earlier than"
+                   " data start date.\nYour end date is %s. Data start date "
+                   "is %s. Earliest possible end date is %s. Selected "
+                   "R0_WINDOW is %d days.")
+        err_data = list(map(lambda x: x.strftime(DATE_FMT) if x else None,\
+                                   (input_end, data_start,
+                                    data_start + datetime.timedelta(days=R0_WINDOW-1))))
+        err_data.append(R0_WINDOW)
+        err_data = tuple(err_data)
+        raise ValueError(err_msg % err_data)
+
+
+
+        raise ValueError("dksdf")
 
 
 # This check is not needed - we just need enough data before the user's start
@@ -49,6 +64,32 @@ def check_dates(start, data_start, input_start, end, data_end, input_end,
 #            dates"""
 #        err_params = (n, window_length)
 #        raise ValueError(err_str % err_params)
+
+def fit_r0(df, subregion, t, R0_WINDOW, SERIAL_INT):
+    """
+    Fit and return r0 value for a particular day:
+        df: truncated per 100K data frame
+        subregion: name of subregion to calculate for
+        t: index of start date
+    """
+    x = [i for i in range(R0_WINDOW)]
+
+    # Take log of data before doing OLS
+    y = np.log(df[subregion].iloc[t:t + R0_WINDOW])
+
+    X = np.vstack([x, np.ones(len(x))]).T
+
+    # If numpy version is < 1.14.0, a TypeError is raised for rcond
+    try:
+        lstsq_output = np.linalg.lstsq(X, y, rcond=None)
+    except TypeError:
+        lstsq_output = np.linalg.lstsq(X, y, rcond=-1)
+
+    b, ln_a = lstsq_output[0]
+    r_0 = np.exp(b*SERIAL_INT)
+
+    return r_0, b, ln_a
+
 
 
 def calculate_r0(args):
@@ -106,22 +147,7 @@ def calculate_r0(args):
         new_row = [day]
 
         for s in subregions:
-            x = [i for i in range(R0_WINDOW)]
-
-            # Take log of data before doing OLS
-            y = np.log(df[s].iloc[t:t + R0_WINDOW])
-
-            X = np.vstack([x, np.ones(len(x))]).T
-
-            # If numpy version is < 1.14.0, a TypeError is raised for rcond
-            try:
-                lstsq_output = np.linalg.lstsq(X, y, rcond=None)
-            except TypeError:
-                lstsq_output = np.linalg.lstsq(X, y, rcond=-1)
-
-            b, ln_a = lstsq_output[0]
-            r_0 = np.exp(b*SERIAL_INT)
-
+            r_0 = fit_r0(df, s, t, R0_WINDOW, SERIAL_INT)[0]
             new_row.append(r_0)
         output_list.append(new_row)
     #create output DF and make the date column the index
