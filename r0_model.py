@@ -10,9 +10,11 @@ import pandas as pd
 import sys
 import params
 import itertools
+from scipy.optimize import curve_fit
 
 DATE_FMT = '%d-%m-%Y'
 
+# TODO: Clean this up
 def check_dates(start, data_start, input_start, end, data_end, input_end,
                 R0_WINDOW):
     """Checks if user start and end dates (for R0 calculation) are valid given
@@ -62,7 +64,7 @@ def check_dates(start, data_start, input_start, end, data_end, input_end,
 #        err_params = (n, window_length)
 #        raise ValueError(err_str % err_params)
 
-def fit_r0(df, subregion, t, R0_WINDOW, SERIAL_INT):
+def fit_r0_log(df, subregion, t, R0_WINDOW, SERIAL_INT):
     """
     Fit and return r0 value for a particular day:
         df: truncated per 100K data frame
@@ -83,11 +85,23 @@ def fit_r0(df, subregion, t, R0_WINDOW, SERIAL_INT):
         lstsq_output = np.linalg.lstsq(X, y, rcond=-1)
 
     b, ln_a = lstsq_output[0]
+    a = np.exp(ln_a)
     r_0 = np.exp(b*SERIAL_INT)
 
-    return r_0, b, ln_a
+    return r_0, b, a
 
+def fit_r0_nonlinear(df, subregion, t, R0_WINDOW, SERIAL_INT):
+    b_first, ln_a_first = fit_r0_log(df, subregion, t, R0_WINDOW, SERIAL_INT)[1:]
+    a_first = np.exp(ln_a_first)
 
+    fun = lambda x, a, b: a*np.exp(b*x)
+    x = [i for i in range(R0_WINDOW)]
+
+    y = df[subregion].iloc[t:t + R0_WINDOW]
+
+    a, b = curve_fit(fun, x, y, p0=(a_first, b_first))[0]
+    r_0 = np.exp(b*SERIAL_INT)
+    return r_0, b, a
 
 def calculate_r0(args):
     # Get arguments:
@@ -96,6 +110,7 @@ def calculate_r0(args):
     input_start = pd.to_datetime(args.start)
     input_end = pd.to_datetime(args.end)
     diag_flag = args.diag
+    method = args.method
     if args.window:
         R0_WINDOW = args.window
     else:
@@ -145,8 +160,11 @@ def calculate_r0(args):
         new_row = [day]
 
         for s in subregions:
-            r_0, b, ln_a = fit_r0(df, s, t, R0_WINDOW, SERIAL_INT)
-            a = np.exp(ln_a)
+            if method == 'log':
+                r_0, b, a = fit_r0_log(df, s, t, R0_WINDOW, SERIAL_INT)
+            elif method == 'nonlinear':
+                r_0, b, a = fit_r0_nonlinear(df, s, t, R0_WINDOW, SERIAL_INT)
+
             if diag_flag:
                 new_row.append(r_0)
                 new_row.append(a)
@@ -191,6 +209,11 @@ if __name__ == '__main__':
     parser.add_argument('--diag', type=bool, default=False,
                         help=("Diagnostic flag. If True, both outputs from the"
                               "least squares fit will be output."))
+    parser.add_argument('--method', type=str, default='log',
+                        help=("Method for fitting r0 value. If 'log', take"
+                              "logarithm of per_100k data then do linear least "
+                              "squares fit. If 'nonlinear', do a nonlinear fit"))
+
 
     args = parser.parse_args()
 
@@ -208,4 +231,6 @@ if __name__ == '__main__':
     if args.start and args.end:
         if args.start >= args.end:
             raise ValueError('End date must be later than start date.')
+    if args.method not in ['log', 'nonlinear']:
+        raise ValueError("Invalid method '%s'." % (args.method))
     output = calculate_r0(args)
